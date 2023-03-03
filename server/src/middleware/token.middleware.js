@@ -1,4 +1,4 @@
-import jsonwebtoken from "jsonwebtoken";
+import jsonWebToken from "jsonwebtoken";
 import resHandler from "../handlers/res.handler.js";
 import patientModel from "../models/patient.model.js";
 import hospitalModel from "../models/hospital.model.js";
@@ -10,7 +10,7 @@ const tokenDecode = (req) => {
 		if (bearerHeader) {
 			const token = bearerHeader.split(" ")[1];
 
-			return jsonwebtoken.verify(token, process.env.TOKEN_SECRET);
+			return jsonWebToken.verify(token, process.env.TOKEN_SECRET);
 		}
 		return false;
 	} catch {
@@ -18,28 +18,21 @@ const tokenDecode = (req) => {
 	}
 };
 
-const auth = async (res, req, next) => {
+const auth = async (req, res, next) => {
 	const tokenDecoded = tokenDecode(req);
 
 	if (!tokenDecoded) {
 		return resHandler.unauthorized(res);
 	}
 
-	const patient = await patientModel.findById(tokenDecoded.data);
-
-	const hospital = await hospitalModel.findById(tokenDecoded.data);
-
-	if (!patient) {
+	const user = await patientModel.findById(tokenDecoded.user) || await hospitalModel.findById(tokenDecoded.user)
+	
+	if (!user) {
 		return resHandler.unauthorized(res);
 	}
 
-	if (!hospital) {
-		return resHandler.unauthorized(res);
-	}
-
-	req.patient = patient;
-
-	req.hospital = hospital;
+	req.user = user;
+	req.userType = user instanceof patientModel ? "patient" : "hospital"
 
 	next();
 };

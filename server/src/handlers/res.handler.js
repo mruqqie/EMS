@@ -34,10 +34,15 @@ const notFound = (res) => {
 	});
 };
 
+const created = (res, data) => {
+	resWithData(res, 201, data)
+}
+
 export default {
 	error,
 	badReq,
 	ok,
 	unauthorized,
 	notFound,
+	created
 };

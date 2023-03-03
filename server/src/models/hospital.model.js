@@ -11,6 +11,7 @@ const hospitalSchema = mongoose.Schema(
 		address: {
 			type: String,
 			required: true,
+			unique: true
 		},
 		state: {
 			type: Date,
@@ -23,6 +24,7 @@ const hospitalSchema = mongoose.Schema(
 		},
 		email: {
 			type: String,
+			required: true,
 			unique: true,
 		},
 		type: {
