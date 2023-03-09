@@ -33,7 +33,7 @@ router.post(
 		}),
 	body("email")
 		.exists()
-		.withMessage("First name is Required.")
+		.withMessage("Email is Required.")
 		.isLength({ min: 8 })
 		.withMessage("First name minimum: 8 Characters.")
 		.custom((value, { req }) => {
@@ -84,5 +84,54 @@ router.post(
 
 router.post(
 	"/signin",
-	body()
-)
+	body("email")
+		.exists()
+		.withMessage("Please enter your email.")
+		.isLength({ min: 8 })
+		.withMessage("Email minimum: 8 Characters.")
+		.custom((value, { req }) => {
+			if (!/^\S+@\S+\.\S+$/.test(value)) {
+				throw new Error("Invalid email format.");
+			}
+			return true;
+		}),
+	body("password")
+		.exists()
+		.withMessage("Password is Required.")
+		.isLength({ min: 6 })
+		.withMessage("Password minimum: 6 Characters."),
+	reqHandler.validate,
+	patientController.signIn
+);
+
+router.put(
+	"/update-password",
+	tokenMiddleware.auth,
+	body("password")
+		.exists()
+		.withMessage("Current Password is required.")
+		.isLength({ min: 6 })
+		.withMessage("Password minimum: 6 Characters."),
+	body("newPassword")
+		.exists()
+		.withMessage("New password is required.")
+		.isLength({ min: 6 })
+		.withMessage("Password minimum: 6 Characters."),
+	body("confirmNewPassword")
+		.exists()
+		.withMessage("New password is required.")
+		.isLength({ min: 6 })
+		.withMessage("Password minimum: 6 Characters.")
+		.custom((value, { req }) => {
+			if (value !== req.body.password) {
+				throw new Error("Password not a match.");
+			}
+			return true;
+		}),
+	reqHandler.validate,
+	patientController.updatePassword
+);
+
+router.get("/info", tokenMiddleware.auth, patientController.getInfo);
+
+export default router;
